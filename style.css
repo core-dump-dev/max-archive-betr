@@ -1,0 +1,68 @@
+body {
+    background: #0f0f12;
+    color: white;
+    font-family: system-ui;
+    margin: 0;
+    padding: 30px;
+}
+
+h1 {
+    font-weight: 600;
+    margin-bottom: 30px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background: #18181c;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+}
+
+.card img {
+    width: 100%;
+    display: block;
+}
+
+.meta {
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.4;
+    opacity: 0.9;
+}
+
+.meta a {
+    color: #7aa2ff;
+    text-decoration: none;
+    word-break: break-all;
+}
+
+.meta a:hover {
+    text-decoration: underline;
+}
+
+button {
+    background: #2a2a30;
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #3a3a44;
+}
