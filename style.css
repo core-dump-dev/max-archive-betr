@@ -1,3 +1,4 @@
+/* Добавлен стиль для активной кнопки сортировки */
 body {
     background: #0f0f12;
     color: white;
@@ -70,6 +71,11 @@ button:hover {
 button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.sort-btn.active {
+    background: #4a4a54;
+    box-shadow: 0 0 0 2px #7aa2ff;
 }
 
 .pagination {

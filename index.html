@@ -13,8 +13,8 @@
     </div>
 
     <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <button id="sort-new">📅 Новые сначала</button>
-        <button id="sort-old">📅 Старые сначала</button>
+        <button id="sort-new" class="sort-btn active">📅 Новые сначала</button>
+        <button id="sort-old" class="sort-btn">📅 Старые сначала</button>
         <span style="flex:1;"></span>
         <div class="pagination" id="pagination"></div>
     </div>
@@ -29,14 +29,18 @@
         const pageSize = 20;
         let currentSort = 'new'; // 'new' или 'old'
 
+        // Надёжный парсинг даты из формата "DD.MM.YYYY - HH:MM"
         function parseDate(dateStr) {
-            // формат: "09.01.2026 - 10:55"
-            const parts = dateStr.split(/[.\s:-]+/);
-            if (parts.length >= 5) {
-                const [day, month, year, , hour, minute] = parts;
-                return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).getTime();
+            try {
+                const [datePart, timePart] = dateStr.split(' - ');
+                const [day, month, year] = datePart.split('.');
+                const [hour, minute] = timePart.split(':');
+                // month в JavaScript от 0 до 11
+                return new Date(year, month - 1, day, hour, minute).getTime();
+            } catch (e) {
+                console.warn('Ошибка парсинга даты:', dateStr);
+                return 0;
             }
-            return 0; // fallback
         }
 
         function sortImages(images, order) {
@@ -62,7 +66,7 @@
                 const card = document.createElement("div");
                 card.className = "card";
 
-                const previewSrc = img.image; // всегда превью из архива
+                const previewSrc = img.image;
                 const downloadedMark = img.local ? ' <span style="color:#8bc34a;">(загружено)</span>' : '';
 
                 card.innerHTML = `
@@ -81,6 +85,7 @@
             });
 
             updatePaginationControls(totalPages);
+            updateActiveSortButton();
         }
 
         function updatePaginationControls(totalPages) {
@@ -118,6 +123,15 @@
                 container.appendChild(pageInfo);
                 container.appendChild(nextBtn);
             });
+        }
+
+        function updateActiveSortButton() {
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            if (currentSort === 'new') {
+                document.getElementById('sort-new').classList.add('active');
+            } else {
+                document.getElementById('sort-old').classList.add('active');
+            }
         }
 
         // Загрузка даты последнего обновления
