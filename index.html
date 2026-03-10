@@ -15,27 +15,34 @@
     <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
         <button id="sort-new" class="sort-btn active">📅 Новые сначала</button>
         <button id="sort-old" class="sort-btn">📅 Старые сначала</button>
-        <span style="flex:1;"></span>
+
+        <div style="flex:1; display: flex; justify-content: flex-end; gap: 8px;">
+            <input type="text" id="search-input" placeholder="Поиск по r (мин. 3 символа)" style="padding: 8px 12px; border-radius: 20px; border: none; background: #2a2a30; color: white; width: 250px;">
+            <button id="search-btn">🔍 Найти</button>
+            <button id="clear-search-btn" style="display: none;">✖ Сброс</button>
+        </div>
+
         <div class="pagination" id="pagination"></div>
     </div>
 
     <div class="grid" id="grid"></div>
+    <div id="no-results" style="text-align: center; padding: 40px; color: #888; display: none;">Ничего не найдено</div>
 
     <div style="margin-top: 30px; text-align: center;" id="pagination-bottom"></div>
 
     <script>
         let allImages = [];
+        let filteredImages = [];
         let currentPage = 1;
         const pageSize = 20;
         let currentSort = 'new'; // 'new' или 'old'
+        let searchQuery = '';
 
-        // Надёжный парсинг даты из формата "DD.MM.YYYY - HH:MM"
         function parseDate(dateStr) {
             try {
                 const [datePart, timePart] = dateStr.split(' - ');
                 const [day, month, year] = datePart.split('.');
                 const [hour, minute] = timePart.split(':');
-                // month в JavaScript от 0 до 11
                 return new Date(year, month - 1, day, hour, minute).getTime();
             } catch (e) {
                 console.warn('Ошибка парсинга даты:', dateStr);
@@ -43,25 +50,42 @@
             }
         }
 
-        function sortImages(images, order) {
-            return [...images].sort((a, b) => {
+        function filterAndSortImages() {
+            let filtered = allImages;
+            if (searchQuery.length >= 3) {
+                const q = searchQuery.toLowerCase();
+                filtered = allImages.filter(img => img.source.toLowerCase().includes(q));
+            }
+
+            // сортировка
+            filtered = [...filtered].sort((a, b) => {
                 const ta = parseDate(a.date);
                 const tb = parseDate(b.date);
-                return order === 'new' ? tb - ta : ta - tb;
+                return currentSort === 'new' ? tb - ta : ta - tb;
             });
+
+            filteredImages = filtered;
+            return filtered;
         }
 
         function renderPage() {
-            const sorted = sortImages(allImages, currentSort);
-            const totalPages = Math.ceil(sorted.length / pageSize);
+            const sortedFiltered = filterAndSortImages();
+            const totalPages = Math.ceil(sortedFiltered.length / pageSize);
             if (currentPage > totalPages) currentPage = totalPages || 1;
             if (currentPage < 1) currentPage = 1;
 
             const start = (currentPage - 1) * pageSize;
-            const pageImages = sorted.slice(start, start + pageSize);
+            const pageImages = sortedFiltered.slice(start, start + pageSize);
 
             const grid = document.getElementById("grid");
             grid.innerHTML = "";
+
+            if (pageImages.length === 0) {
+                document.getElementById("no-results").style.display = 'block';
+            } else {
+                document.getElementById("no-results").style.display = 'none';
+            }
+
             pageImages.forEach(img => {
                 const card = document.createElement("div");
                 card.className = "card";
@@ -86,6 +110,7 @@
 
             updatePaginationControls(totalPages);
             updateActiveSortButton();
+            updateClearButton();
         }
 
         function updatePaginationControls(totalPages) {
@@ -134,6 +159,34 @@
             }
         }
 
+        function updateClearButton() {
+            const clearBtn = document.getElementById('clear-search-btn');
+            if (searchQuery.length >= 3) {
+                clearBtn.style.display = 'inline-block';
+            } else {
+                clearBtn.style.display = 'none';
+            }
+        }
+
+        function performSearch() {
+            const input = document.getElementById('search-input');
+            const query = input.value.trim();
+            if (query.length === 0 || query.length < 3) {
+                searchQuery = '';
+            } else {
+                searchQuery = query;
+            }
+            currentPage = 1;
+            renderPage();
+        }
+
+        function clearSearch() {
+            document.getElementById('search-input').value = '';
+            searchQuery = '';
+            currentPage = 1;
+            renderPage();
+        }
+
         // Загрузка даты последнего обновления
         fetch("last_update.txt")
             .then(r => r.text())
@@ -149,8 +202,6 @@
             .then(images => {
                 allImages = images;
                 document.getElementById("title").textContent = `Архив i.oneme.ru/i* (Всего: ${images.length})`;
-                currentSort = 'new';
-                currentPage = 1;
                 renderPage();
 
                 document.getElementById("sort-new").addEventListener("click", () => {
@@ -163,6 +214,12 @@
                     currentPage = 1;
                     renderPage();
                 });
+
+                document.getElementById("search-btn").addEventListener("click", performSearch);
+                document.getElementById("search-input").addEventListener("keypress", (e) => {
+                    if (e.key === 'Enter') performSearch();
+                });
+                document.getElementById("clear-search-btn").addEventListener("click", clearSearch);
             });
     </script>
 </body>

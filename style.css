@@ -1,4 +1,3 @@
-/* Добавлен стиль для активной кнопки сортировки */
 body {
     background: #0f0f12;
     color: white;
@@ -52,7 +51,7 @@ h1 {
     text-decoration: underline;
 }
 
-button {
+button, .pagination button {
     background: #2a2a30;
     border: none;
     color: white;
@@ -60,15 +59,15 @@ button {
     border-radius: 20px;
     font-size: 14px;
     cursor: pointer;
-    margin-right: 10px;
+    margin-right: 5px;
     transition: 0.2s;
 }
 
-button:hover {
+button:hover, .pagination button:hover {
     background: #3a3a44;
 }
 
-button:disabled {
+button:disabled, .pagination button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
@@ -87,4 +86,35 @@ button:disabled {
 .pagination span {
     color: #aaa;
     font-size: 14px;
+    margin: 0 5px;
+}
+
+#search-input {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: 1px solid #3a3a44;
+    background: #1e1e24;
+    color: white;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+#search-input:focus {
+    border-color: #7aa2ff;
+}
+
+#clear-search-btn {
+    background: #3a3a44;
+}
+
+#clear-search-btn:hover {
+    background: #5a5a66;
+}
+
+#no-results {
+    text-align: center;
+    padding: 40px;
+    color: #888;
+    font-size: 16px;
 }
