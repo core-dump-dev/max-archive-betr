@@ -12,26 +12,53 @@
         <span id="last-update" style="color: #888; font-size: 14px;"></span>
     </div>
 
-    <div style="margin-bottom: 20px;">
+    <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
         <button id="sort-new">📅 Новые сначала</button>
         <button id="sort-old">📅 Старые сначала</button>
+        <span style="flex:1;"></span>
+        <div class="pagination" id="pagination"></div>
     </div>
 
     <div class="grid" id="grid"></div>
 
+    <div style="margin-top: 30px; text-align: center;" id="pagination-bottom"></div>
+
     <script>
         let allImages = [];
+        let currentPage = 1;
+        const pageSize = 20;
+        let currentSort = 'new'; // 'new' или 'old'
 
         function parseDate(dateStr) {
             // формат: "09.01.2026 - 10:55"
-            const [day, month, year, , hour, minute] = dateStr.split(/[.\s:-]+/);
-            return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).getTime();
+            const parts = dateStr.split(/[.\s:-]+/);
+            if (parts.length >= 5) {
+                const [day, month, year, , hour, minute] = parts;
+                return new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).getTime();
+            }
+            return 0; // fallback
         }
 
-        function renderImages(sortedArray) {
+        function sortImages(images, order) {
+            return [...images].sort((a, b) => {
+                const ta = parseDate(a.date);
+                const tb = parseDate(b.date);
+                return order === 'new' ? tb - ta : ta - tb;
+            });
+        }
+
+        function renderPage() {
+            const sorted = sortImages(allImages, currentSort);
+            const totalPages = Math.ceil(sorted.length / pageSize);
+            if (currentPage > totalPages) currentPage = totalPages || 1;
+            if (currentPage < 1) currentPage = 1;
+
+            const start = (currentPage - 1) * pageSize;
+            const pageImages = sorted.slice(start, start + pageSize);
+
             const grid = document.getElementById("grid");
             grid.innerHTML = "";
-            sortedArray.forEach(img => {
+            pageImages.forEach(img => {
                 const card = document.createElement("div");
                 card.className = "card";
 
@@ -52,15 +79,45 @@
                 `;
                 grid.appendChild(card);
             });
+
+            updatePaginationControls(totalPages);
         }
 
-        function sortAndRender(order) {
-            const sorted = [...allImages].sort((a, b) => {
-                const ta = parseDate(a.date);
-                const tb = parseDate(b.date);
-                return order === 'new' ? tb - ta : ta - tb;
+        function updatePaginationControls(totalPages) {
+            const paginationDivs = document.querySelectorAll('#pagination, #pagination-bottom');
+            paginationDivs.forEach(container => {
+                container.innerHTML = '';
+
+                if (totalPages <= 1) return;
+
+                const prevBtn = document.createElement('button');
+                prevBtn.textContent = '←';
+                prevBtn.disabled = currentPage === 1;
+                prevBtn.addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderPage();
+                    }
+                });
+
+                const pageInfo = document.createElement('span');
+                pageInfo.style.margin = '0 10px';
+                pageInfo.textContent = `Страница ${currentPage} из ${totalPages}`;
+
+                const nextBtn = document.createElement('button');
+                nextBtn.textContent = '→';
+                nextBtn.disabled = currentPage === totalPages;
+                nextBtn.addEventListener('click', () => {
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderPage();
+                    }
+                });
+
+                container.appendChild(prevBtn);
+                container.appendChild(pageInfo);
+                container.appendChild(nextBtn);
             });
-            renderImages(sorted);
         }
 
         // Загрузка даты последнего обновления
@@ -78,10 +135,20 @@
             .then(images => {
                 allImages = images;
                 document.getElementById("title").textContent = `Архив i.oneme.ru/i* (Всего: ${images.length})`;
-                sortAndRender('new');
+                currentSort = 'new';
+                currentPage = 1;
+                renderPage();
 
-                document.getElementById("sort-new").addEventListener("click", () => sortAndRender('new'));
-                document.getElementById("sort-old").addEventListener("click", () => sortAndRender('old'));
+                document.getElementById("sort-new").addEventListener("click", () => {
+                    currentSort = 'new';
+                    currentPage = 1;
+                    renderPage();
+                });
+                document.getElementById("sort-old").addEventListener("click", () => {
+                    currentSort = 'old';
+                    currentPage = 1;
+                    renderPage();
+                });
             });
     </script>
 </body>

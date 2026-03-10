@@ -66,3 +66,19 @@ button {
 button:hover {
     background: #3a3a44;
 }
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pagination span {
+    color: #aaa;
+    font-size: 14px;
+}
