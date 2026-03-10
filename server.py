@@ -172,4 +172,4 @@ if __name__ == "__main__":
     t_downloader.start()
 
     print(f"\n🌐 Сервер запущен на http://localhost:{PORT}")
-    HTTPServer(("localhost", PORT), SimpleHTTPRequestHandler).serve_forever()
+    HTTPServer(("0.0.0.0", PORT), SimpleHTTPRequestHandler).serve_forever()
