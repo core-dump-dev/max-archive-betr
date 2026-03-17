@@ -105,3 +105,6 @@ start.bat
 - Если вы хотите ускорить начальное сканирование, уменьшите `DOWNLOAD_DELAY` в `server.py` (но учитывайте лимиты Wayback Machine).  
 
 ---
+
+[Оригинал проекта](https://github.com/sxtw/max-oneme-archive)
+
